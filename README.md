@@ -55,7 +55,7 @@ Firs you need to acquire username and apiKey to use Cloud Files.
 When you acquire data you can continue on further setup.
 By default configuration is set to LON region. If you are using the same then bare minimum for configuration is
 ``` yml
-appsco_ket_filesystem:
+appsco_filesystem:
     rackspace:
         client:
             username: %username%
@@ -66,7 +66,7 @@ appsco_ket_filesystem:
 Here is the full configuration (config.json) for rackspace open cloud.
 
 ``` yml
-appsco_ket_filesystem:
+appsco_filesystem:
     rackspace:
         client:
             username: %username%
