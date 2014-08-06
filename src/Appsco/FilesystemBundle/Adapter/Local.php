@@ -1,6 +1,7 @@
 <?php
 namespace Appsco\FilesystemBundle\Adapter;
 
+use Symfony\Component\Filesystem\Exception\IOException;
 use Symfony\Component\Filesystem\Filesystem;
 
 class Local extends Adapter
@@ -15,6 +16,11 @@ class Local extends Adapter
      * @var bool
      */
     private $createIfNotExists;
+
+    /**
+     * @var string
+     */
+    private $container;
 
     public function __construct(Filesystem $fs, $createIfNotExists = false)
     {
@@ -67,7 +73,12 @@ class Local extends Adapter
      */
     public function write($key, $content)
     {
-        $this->fs->dumpFile($this->getRealPath($key), $content);
+        try{
+            $this->fs->dumpFile($this->getRealPath($key), $content);
+        } catch(\Exception $e){
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -79,7 +90,12 @@ class Local extends Adapter
      */
     public function mkdir($dir, $recursive = true)
     {
-        $this->fs->mkdir($this->getRealPath($dir));
+        try{
+            $this->fs->mkdir($this->getRealPath($dir));
+        } catch(\Exception $e){
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -163,7 +179,12 @@ class Local extends Adapter
      */
     public function rename($sourceKey, $targetKey)
     {
-        $this->fs->rename($this->getRealPath($sourceKey), $this->getRealPath($targetKey), true);
+        try{
+            $this->fs->rename($this->getRealPath($sourceKey), $this->getRealPath($targetKey), true);
+        }catch (\Exception $e){
+            return false;
+        }
+        return true;
     }
 
     /**

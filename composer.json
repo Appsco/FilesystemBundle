@@ -11,6 +11,9 @@
         "symfony/symfony": "~2.2",
         "rackspace/php-opencloud": "v1.10.0"
     },
+    "require-dev": {
+        "phpunit/phpunit": "4.1.*"
+    },
     "config": {
         "bin-dir": "bin"
     }
