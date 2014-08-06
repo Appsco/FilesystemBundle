@@ -1,0 +1,13 @@
+services:
+    appsco_filesystem.client:
+        class: OpenCloud\Rackspace
+
+    appsco_filesystem.objectstore:
+        class: OpenCloud\ObjectStore\Service
+
+    appsco_filesystem.adapter.opencloud:
+        class: Appsco\FilesystemBundle\Adapter\OpenCloud
+        arguments:
+            - @appsco_filesystem.objectstore
+        tags:
+            - { name: appsco_filesystem.adapter, alias: rackspace }

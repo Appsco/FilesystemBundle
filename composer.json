@@ -1,0 +1,17 @@
+{
+    "name": "appsco/filesystembundle",
+    "license": "MIT",
+    "type": "project",
+    "description": "Use different Filesystems",
+    "autoload": {
+        "psr-0": { "": "src/"}
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/symfony": "~2.2",
+        "rackspace/php-opencloud": "v1.10.0"
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}

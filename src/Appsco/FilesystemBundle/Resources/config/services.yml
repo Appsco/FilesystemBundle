@@ -1,0 +1,11 @@
+services:
+    appsco_filesystem.adapter.local:
+        class: Appsco\FilesystemBundle\Adapter\Local
+        arguments:
+            - @filesystem
+            - true
+        tags:
+            - { name: appsco_filesystem.adapter, alias: local }
+
+    appsco_filesystem.filesystem:
+        class: Appsco\FilesystemBundle\Service\FilesystemProvider
