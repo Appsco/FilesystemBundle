@@ -152,8 +152,7 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
             $this->filesystemMock->expects($this->once())
                 ->method('dumpFile')
                 ->withAnyParameters()
-                ->will($this->throwException(new \Exception()));
-            ;
+                ->will($this->throwException(new \Exception()));;
 
             $local = new Local($this->filesystemMock, false);
 
@@ -193,7 +192,8 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
         /**
          * @test
          */
-        public function shouldReturnTrueIfFileExists(){
+        public function shouldReturnTrueIfFileExists()
+        {
             $this->filesystemMock->expects($this->once())
                 ->method('exists')
                 ->withAnyParameters()
@@ -207,7 +207,8 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
         /**
          * @test
          */
-        public function shouldReturnFalseIfFileDoesntExists(){
+        public function shouldReturnFalseIfFileDoesntExists()
+        {
             $this->filesystemMock->expects($this->once())
                 ->method('exists')
                 ->withAnyParameters()
@@ -216,6 +217,148 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
             $local = new Local($this->filesystemMock, false);
 
             $this->assertFalse($local->exists('dir'));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnListOfKeys()
+        {
+            $local = new Local($this->filesystemMock, false);
+
+            $this->assertInternalType('array', $local->keys());
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnTimestamp()
+        {
+            $key = __FILE__;
+
+            $this->filesystemMock->expects($this->any())
+                ->method('exists')
+                ->with('')
+                ->willReturn(true);
+
+            $this->filesystemMock->expects($this->never())
+                ->method('mkdir')
+                ->with($key);
+
+            $local = new Local($this->filesystemMock, false);
+            $local->getVolume('');
+
+            $this->assertEquals(filemtime(__FILE__), $local->mtime($key));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnFalseIfFileDoesntExist()
+        {
+            $key = __FILE__;
+
+            $this->filesystemMock->expects($this->any())
+                ->method('exists')
+                ->with('')
+                ->willReturn(true);
+
+            $local = new Local($this->filesystemMock, false);
+            $local->getVolume('');
+
+            $this->assertFalse($local->mtime($key . rand(0, 100)));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnTrueIfFileIsDeleted()
+        {
+            $this->filesystemMock->expects($this->any())
+                ->method('remove')
+                ->withAnyParameters()
+                ->willReturn(true);
+
+            $local = new Local($this->filesystemMock, false);
+            $this->assertTrue($local->delete('string'));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnFalseIfFileCantBeDeleted()
+        {
+            $this->filesystemMock->expects($this->any())
+                ->method('remove')
+                ->withAnyParameters()
+                ->willThrowException(new \Exception());
+
+            $local = new Local($this->filesystemMock, false);
+            $this->assertFalse($local->delete('string'));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnTrueIfFileIsRenamed()
+        {
+            $this->filesystemMock->expects($this->any())
+                ->method('rename')
+                ->withAnyParameters()
+                ->willReturn(true);
+
+            $local = new Local($this->filesystemMock, false);
+            $this->assertTrue($local->rename('string', 'string'));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnFalseIfFileCantBeRenamed()
+        {
+            $this->filesystemMock->expects($this->any())
+                ->method('rename')
+                ->withAnyParameters()
+                ->willThrowException(new \Exception());
+
+            $local = new Local($this->filesystemMock, false);
+            $this->assertFalse($local->rename('string', 'string'));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnTrueIfDirectoryExists()
+        {
+            $key = __DIR__;
+
+            $this->filesystemMock->expects($this->any())
+                ->method('exists')
+                ->with('')
+                ->willReturn(true);
+
+            $local = new Local($this->filesystemMock, false);
+            $local->getVolume('');
+
+            $this->assertTrue($local->isDirectory($key));
+        }
+
+        /**
+         * @test
+         */
+        public function shouldReturnFalseIfDirectoryDoesntExists()
+        {
+            $key = __DIR__ . rand(0,100);
+
+            $this->filesystemMock->expects($this->any())
+                ->method('exists')
+                ->with('')
+                ->willReturn(true);
+
+            $local = new Local($this->filesystemMock, false);
+            $local->getVolume('');
+
+            $this->assertFalse($local->isDirectory($key));
         }
     }
 }

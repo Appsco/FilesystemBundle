@@ -57,9 +57,10 @@ class Local extends Adapter
      */
     public function read($key)
     {
-        if(true === $this->isDirectory($key)) {
+        if (true === $this->isDirectory($key)) {
             return false;
         }
+
         return file_get_contents($this->getRealPath($key));
     }
 
@@ -73,11 +74,12 @@ class Local extends Adapter
      */
     public function write($key, $content)
     {
-        try{
+        try {
             $this->fs->dumpFile($this->getRealPath($key), $content);
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             return false;
         }
+
         return true;
     }
 
@@ -90,11 +92,12 @@ class Local extends Adapter
      */
     public function mkdir($dir, $recursive = true)
     {
-        try{
+        try {
             $this->fs->mkdir($this->getRealPath($dir));
-        } catch(\Exception $e){
+        } catch (\Exception $e) {
             return false;
         }
+
         return true;
     }
 
@@ -154,7 +157,7 @@ class Local extends Adapter
     public function mtime($key)
     {
         // clearstatcache();
-        return filemtime($this->getRealPath($key));
+        return @filemtime($this->getRealPath($key));
     }
 
     /**
@@ -166,7 +169,13 @@ class Local extends Adapter
      */
     public function delete($key)
     {
-        $this->fs->remove($key);
+        try {
+            $this->fs->remove($key);
+        } catch (\Exception $e) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -179,11 +188,12 @@ class Local extends Adapter
      */
     public function rename($sourceKey, $targetKey)
     {
-        try{
+        try {
             $this->fs->rename($this->getRealPath($sourceKey), $this->getRealPath($targetKey), true);
-        }catch (\Exception $e){
+        } catch (\Exception $e) {
             return false;
         }
+
         return true;
     }
 
