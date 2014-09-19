@@ -1,12 +1,15 @@
 <?php
-namespace Appsco\FilesystemBundle\Adapter;
+namespace Appsco\FilesystemBundle\Adapter\OpenCloud;
 
+use Appsco\FilesystemBundle\Adapter\Adapter;
+use Appsco\FilesystemBundle\Model\File;
 use Guzzle\Http\Exception\ClientErrorResponseException;
 use OpenCloud\Common\Constants\Header;
 use OpenCloud\Common\Exceptions\CreateUpdateError;
 use OpenCloud\Common\Exceptions\DeleteError;
 use OpenCloud\ObjectStore\Exception\ObjectNotFoundException;
 use OpenCloud\ObjectStore\Resource\Container;
+use OpenCloud\ObjectStore\Resource\DataObject;
 use OpenCloud\ObjectStore\Service;
 
 /**
@@ -90,12 +93,12 @@ class OpenCloud extends Adapter
      *
      * @param string $key
      *
-     * @return string|boolean if cannot read content
+     * @return File|boolean if cannot read content
      */
     public function read($key)
     {
         if ($object = $this->tryGetObject($key)) {
-            return $object->getContent();
+            return $this->generateFileFromDataObject($object);
         }
 
         return false;
@@ -156,10 +159,10 @@ class OpenCloud extends Adapter
     }
 
     /**
-     * @param null $path
+     * @param null|string $path
      * @param bool $recursive
      *
-     * @return array
+     * @return File[] Content fields will be null
      */
     public function keys($path = null, $recursive = false)
     {
@@ -175,7 +178,7 @@ class OpenCloud extends Adapter
         $keys = array();
 
         while ($object = $objectList->next()) {
-            $keys[$object->getName()] = $object->getName();
+            $keys[$object->getName()] = $this->generateFileFromDataObject($object, false);
         }
 
         //sort($keys);
@@ -287,5 +290,24 @@ class OpenCloud extends Adapter
         } catch (ObjectNotFoundException $objFetchError) {
             return false;
         }
+    }
+
+    /**
+     * @param DataObject $object
+     * @param bool $includeContent
+     *
+     * @return File
+     */
+    private function generateFileFromDataObject(DataObject $object, $includeContent = true)
+    {
+        $file = new File();
+        if ($includeContent) {
+            $file->content = $object->getContent();
+        }
+        $file->mime = $object->getContentType();
+        $file->name = $object->getName();
+        $file->size = $object->getContentLength();
+
+        return $file;
     }
 }

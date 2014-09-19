@@ -1,8 +1,9 @@
 <?php
-namespace Appsco\FilesystemBundle\Adapter;
+namespace Appsco\FilesystemBundle\Adapter\Local;
 
+use Appsco\FilesystemBundle\Model\File;
+use Appsco\FilesystemBundle\Adapter\Adapter;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
 
 class Local extends Adapter
 {
@@ -53,7 +54,7 @@ class Local extends Adapter
      *
      * @param string $key
      *
-     * @return string|boolean if cannot read content
+     * @return File|boolean if cannot read content
      */
     public function read($key)
     {
@@ -61,7 +62,7 @@ class Local extends Adapter
             return false;
         }
 
-        return file_get_contents($this->getRealPath($key));
+        return $this->fs->read($this->getRealPath($key));
     }
 
     /**
@@ -74,8 +75,13 @@ class Local extends Adapter
      */
     public function write($key, $content)
     {
+        $path = $this->getRealPath($key);
+
         try {
-            $this->fs->dumpFile($this->getRealPath($key), $content);
+            if ($this->exists($path)) {
+                $this->fs->remove($path);
+            }
+            $this->fs->dumpFile($path, $content);
         } catch (\Exception $e) {
             return false;
         }
@@ -141,7 +147,7 @@ class Local extends Adapter
             if (in_array($name, ['.', '..'])) {
                 continue;
             }
-            $keys[$path . DIRECTORY_SEPARATOR . $name] = $path . DIRECTORY_SEPARATOR . $name;
+            $keys[$path . DIRECTORY_SEPARATOR . $name] = $this->fs->read($this->getRealPath($path . DIRECTORY_SEPARATOR . $name), false);
         }
 
         return $keys;
@@ -170,7 +176,7 @@ class Local extends Adapter
     public function delete($key)
     {
         try {
-            $this->fs->remove($key);
+            $this->fs->remove($this->getRealPath($key));
         } catch (\Exception $e) {
             return false;
         }

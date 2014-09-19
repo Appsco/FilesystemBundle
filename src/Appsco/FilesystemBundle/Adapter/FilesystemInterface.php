@@ -1,6 +1,8 @@
 <?php
 namespace Appsco\FilesystemBundle\Adapter;
 
+use Appsco\FilesystemBundle\Model\File;
+
 /**
  * Interface for the filesystem adapters
  *
@@ -12,7 +14,7 @@ interface FilesystemInterface
      *
      * @param string $key
      *
-     * @return string|boolean if cannot read content
+     * @return File|boolean if cannot read content
      */
     public function read($key);
 
