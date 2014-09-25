@@ -49,10 +49,10 @@ interface FilesystemInterface
     /**
      * Returns an array of all keys (files and directories)
      *
-     * @param null $path If null will return list of volume root content
+     * @param null|string $path If null will return list of volume root content
      * @param bool $recursive will go through full list
      *
-     * @return array
+     * @return File[] Associative array. Array's keys are file keys (paths for Local, keys for OpenCloud etc...)
      */
     public function keys($path = null, $recursive = false);
 

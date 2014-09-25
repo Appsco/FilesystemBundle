@@ -6,7 +6,7 @@ services:
         class: OpenCloud\ObjectStore\Service
 
     appsco_filesystem.adapter.opencloud:
-        class: Appsco\FilesystemBundle\Adapter\OpenCloud
+        class: Appsco\FilesystemBundle\Adapter\OpenCloud\OpenCloud
         arguments:
             - @appsco_filesystem.objectstore
         tags:

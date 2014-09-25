@@ -181,8 +181,6 @@ class OpenCloud extends Adapter
             $keys[$object->getName()] = $this->generateFileFromDataObject($object, false);
         }
 
-        //sort($keys);
-
         return $keys;
     }
 
@@ -214,11 +212,11 @@ class OpenCloud extends Adapter
         if (!$object = $this->tryGetObject($key)) {
             return false;
         }
+
         try {
             if($this->isDirectory($key)){
-                $objects = $this->keys($key, true);
-                foreach($objects as $path){
-                    $object = $this->tryGetObject($path);
+                $objects = $this->container->objectList(['prefix' => $key]);
+                foreach($objects as $object){
                     $object->delete();
                 }
             } else {
@@ -305,7 +303,8 @@ class OpenCloud extends Adapter
             $file->content = $object->getContent();
         }
         $file->mime = $object->getContentType();
-        $file->name = $object->getName();
+        $chunks = explode('/', $object->getName());
+        $file->name = array_pop($chunks);
         $file->size = $object->getContentLength();
 
         return $file;

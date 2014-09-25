@@ -18,6 +18,10 @@ class Filesystem extends SymfonyFilesystem
      */
     public function read($key, $includeContent = true)
     {
+        if (!$this->exists($key) || !is_readable($key)) {
+            return false;
+        }
+
         $info = new \SplFileInfo($key);
 
         $file = new File();

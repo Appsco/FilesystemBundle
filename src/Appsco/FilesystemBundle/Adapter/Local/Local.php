@@ -4,6 +4,7 @@ namespace Appsco\FilesystemBundle\Adapter\Local;
 use Appsco\FilesystemBundle\Model\File;
 use Appsco\FilesystemBundle\Adapter\Adapter;
 use Symfony\Component\Filesystem\Exception\IOException;
+use Symfony\Component\Finder\Finder;
 
 class Local extends Adapter
 {
@@ -116,38 +117,28 @@ class Local extends Adapter
      */
     public function exists($key)
     {
-        return $this->fs->exists($key);
+        return $this->fs->exists($this->getRealPath($key));
     }
 
     /**
-     * Returns an array of all keys (files and directories)
      *
-     * @return array
+     * @param null $path
+     * @param bool $recursive
+     *
+     * @return \Appsco\FilesystemBundle\Model\File[]|array
      */
     public function keys($path = null, $recursive = false)
     {
-        $keys = array();
+        $keys = [];
+        $finder = new Finder();
 
-        $path = str_replace(
-            [
-                DIRECTORY_SEPARATOR . '..',
-                '..' . DIRECTORY_SEPARATOR,
-                DIRECTORY_SEPARATOR . '.',
-                '.' . DIRECTORY_SEPARATOR,
-            ],
-            '',
-            $path
-        );
-
-        if (!$list = @scandir($this->getRealPath($path))) {
-            return [];
+        $finder->in($this->getRealPath($path))->ignoreDotFiles(true);
+        if (false === $recursive) {
+            $finder->depth(0);
         }
 
-        foreach ($list as $name) {
-            if (in_array($name, ['.', '..'])) {
-                continue;
-            }
-            $keys[$path . DIRECTORY_SEPARATOR . $name] = $this->fs->read($this->getRealPath($path . DIRECTORY_SEPARATOR . $name), false);
+        foreach ($finder as $file) {
+            $keys[$file->getRelativePathname()] = $this->fs->read($file, false);
         }
 
         return $keys;
@@ -177,7 +168,7 @@ class Local extends Adapter
     {
         try {
             $this->fs->remove($this->getRealPath($key));
-        } catch (\Exception $e) {
+        } catch (IOException $e) {
             return false;
         }
 
