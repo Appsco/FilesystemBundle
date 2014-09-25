@@ -23,7 +23,7 @@ class FilesystemProvider
         if ($adapter) {
             return $adapter->getVolume($volume);
         }
-        throw new \RuntimeException("Specified adater isn't registered");
+        throw new \RuntimeException("Specified adapter isn't registered");
     }
 
     /**

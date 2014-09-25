@@ -1,14 +1,9 @@
 <?php
-namespace Appsco\FilesystemBundle\Adapter {
-    function file_get_contents($k)
-    {
-        return 'string';
-    }
-}
 
 namespace Appsco\FilesystemBundle\Test\Adapter {
 
-    use Appsco\FilesystemBundle\Adapter\Local;
+    use Appsco\FilesystemBundle\Adapter\Local\Local;
+    use Appsco\FilesystemBundle\Model\File;
 
     class LocalTest extends \PHPUnit_Framework_TestCase
     {
@@ -19,7 +14,7 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
 
         protected function setUp()
         {
-            $this->filesystemMock = $this->getMock('Symfony\Component\Filesystem\Filesystem');
+            $this->filesystemMock = $this->getMock('Appsco\FilesystemBundle\Adapter\Local\Filesystem');
         }
 
         /**
@@ -97,7 +92,12 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
                 ->method('mkdir')
                 ->with($key);
 
-            $mock = $this->getMockBuilder('Appsco\FilesystemBundle\Adapter\Local')
+            $this->filesystemMock->expects($this->once())
+              ->method('read')
+              ->with("$key/$key")
+              ->willReturn($file = new File());
+
+            $mock = $this->getMockBuilder('Appsco\FilesystemBundle\Adapter\Local\Local')
                 ->setConstructorArgs([$this->filesystemMock, false])
                 ->setMethods(['isDirectory'])
                 ->getMock();
@@ -108,7 +108,7 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
 
             $mock->getVolume($key);
 
-            $this->assertEquals('string', $mock->read($key));
+            $this->assertSame($file, $mock->read($key));
         }
 
         /**
@@ -117,7 +117,7 @@ namespace Appsco\FilesystemBundle\Test\Adapter {
         public function shouldReturnFalseWhenReadingIfItIsDirectory()
         {
             $key = 'key';
-            $mock = $this->getMockBuilder('Appsco\FilesystemBundle\Adapter\Local')
+            $mock = $this->getMockBuilder('Appsco\FilesystemBundle\Adapter\Local\Local')
                 ->setConstructorArgs([$this->filesystemMock, false])
                 ->setMethods(['isDirectory'])
                 ->getMock();

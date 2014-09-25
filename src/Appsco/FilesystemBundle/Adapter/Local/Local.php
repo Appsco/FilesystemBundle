@@ -1,8 +1,10 @@
 <?php
-namespace Appsco\FilesystemBundle\Adapter;
+namespace Appsco\FilesystemBundle\Adapter\Local;
 
+use Appsco\FilesystemBundle\Model\File;
+use Appsco\FilesystemBundle\Adapter\Adapter;
 use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
 
 class Local extends Adapter
 {
@@ -53,7 +55,7 @@ class Local extends Adapter
      *
      * @param string $key
      *
-     * @return string|boolean if cannot read content
+     * @return File|boolean if cannot read content
      */
     public function read($key)
     {
@@ -61,7 +63,7 @@ class Local extends Adapter
             return false;
         }
 
-        return file_get_contents($this->getRealPath($key));
+        return $this->fs->read($this->getRealPath($key));
     }
 
     /**
@@ -74,8 +76,13 @@ class Local extends Adapter
      */
     public function write($key, $content)
     {
+        $path = $this->getRealPath($key);
+
         try {
-            $this->fs->dumpFile($this->getRealPath($key), $content);
+            if ($this->exists($path)) {
+                $this->fs->remove($path);
+            }
+            $this->fs->dumpFile($path, $content);
         } catch (\Exception $e) {
             return false;
         }
@@ -110,38 +117,28 @@ class Local extends Adapter
      */
     public function exists($key)
     {
-        return $this->fs->exists($key);
+        return $this->fs->exists($this->getRealPath($key));
     }
 
     /**
-     * Returns an array of all keys (files and directories)
      *
-     * @return array
+     * @param null $path
+     * @param bool $recursive
+     *
+     * @return \Appsco\FilesystemBundle\Model\File[]|array
      */
     public function keys($path = null, $recursive = false)
     {
-        $keys = array();
+        $keys = [];
+        $finder = new Finder();
 
-        $path = str_replace(
-            [
-                DIRECTORY_SEPARATOR . '..',
-                '..' . DIRECTORY_SEPARATOR,
-                DIRECTORY_SEPARATOR . '.',
-                '.' . DIRECTORY_SEPARATOR,
-            ],
-            '',
-            $path
-        );
-
-        if (!$list = @scandir($this->getRealPath($path))) {
-            return [];
+        $finder->in($this->getRealPath($path))->ignoreDotFiles(true);
+        if (false === $recursive) {
+            $finder->depth(0);
         }
 
-        foreach ($list as $name) {
-            if (in_array($name, ['.', '..'])) {
-                continue;
-            }
-            $keys[$path . DIRECTORY_SEPARATOR . $name] = $path . DIRECTORY_SEPARATOR . $name;
+        foreach ($finder as $file) {
+            $keys[$file->getRelativePathname()] = $this->fs->read($file, false);
         }
 
         return $keys;
@@ -170,8 +167,8 @@ class Local extends Adapter
     public function delete($key)
     {
         try {
-            $this->fs->remove($key);
-        } catch (\Exception $e) {
+            $this->fs->remove($this->getRealPath($key));
+        } catch (IOException $e) {
             return false;
         }
 
