@@ -166,7 +166,6 @@ class OpenCloud extends Adapter
      */
     public function keys($path = null, $recursive = false)
     {
-
         $options = [];
         if(!$recursive) {
             $options['path'] = $path;
@@ -178,7 +177,15 @@ class OpenCloud extends Adapter
         $keys = array();
 
         while ($object = $objectList->next()) {
-            $keys[$object->getName()] = $this->generateFileFromDataObject($object, false);
+            $name = $object->getName();
+            if (null !== $path) {
+                $name = substr($name, strlen($path));
+                $name = ltrim($name, '/');
+            }
+            if ('' === trim($name)) {
+                continue;
+            }
+            $keys[$name] = $this->generateFileFromDataObject($object, false);
         }
 
         return $keys;
