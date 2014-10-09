@@ -59,11 +59,9 @@ class Local extends Adapter
      */
     public function read($key)
     {
-        if (true === $this->isDirectory($key)) {
-            return false;
-        }
+        $includeContent = !$this->isDirectory($key);
 
-        return $this->fs->read($this->getRealPath($key));
+        return $this->fs->read($this->getRealPath($key), $includeContent);
     }
 
     /**
